@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MentorAQ - Your Career Companion</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> </head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 Career Craft</div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showSection('home')">Home</a></li>
+                <li><a href="#" onclick="showSection('resume')">Resume Analyzer</a></li>
+                <li><a href="#" onclick="showSection('recommender')">Career Recommender</a></li>
+                <li><a href="#" onclick="showSection('mentors')">Find Mentor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="content-section active">
+            <div class="hero">
+                <h1>🎓 Welcome to Career Craft</h1>
+                <p>Your intelligent career companion for resume analysis, personalized recommendations, and expert mentorship</p>
+            </div>
+
+            <div class="features">
+                <div class="feature-card" onclick="showSection('resume')">
+                    <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
+                    <h2>Resume Analyzer</h2>
+                    <p>Get instant ATS compatibility score and professional improvement suggestions</p>
+                    <button class="btn btn-primary">Analyze Resume</button>
+                </div>
+                <div class="feature-card" onclick="showSection('recommender')">
+                    <div class="feature-icon"><i class="fas fa-briefcase"></i></div>
+                    <h2>Career Recommender</h2>
+                    <p>Get personalized internship and course recommendations based on your skills</p>
+                    <button class="btn btn-primary">Get Recommendations</button>
+                </div>
+                <div class="feature-card" onclick="showSection('mentors')">
+                    <div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h2>Find Mentor</h2>
+                    <p>Connect with expert faculty mentors who can guide your career journey</p>
+                    <button class="btn btn-primary">Find Mentor</button>
+                </div>
+            </div>
+            
+            <h2 class="section-title text-light">Platform Statistics</h2>
+            <div class="stats" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-number">...</div>
+                    <div class="stat-label">Faculty Mentors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">...</div>
+                    <div class="stat-label">Internships</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">...</div>
+                    <div class="stat-label">Courses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">...</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resume" class="content-section">
+            <h1 class="section-title">📄 Resume ATS Analyzer</h1>
+            <div class="card p-3 alert-info-bg">
+                <i class="fas fa-info-circle icon-large"></i>
+                <span>Upload your resume (PDF only) to get instant ATS compatibility analysis and actionable improvement suggestions based on the job description.</span>
+            </div>
+
+            <div class="card p-4">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="resumeFile" class="file-input" accept=".pdf" onchange="handleFileSelect(event)">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <h3>Drop your resume here or click to upload</h3>
+                    <p>Supports PDF files only</p>
+                    <button class="btn btn-secondary" onclick="document.getElementById('resumeFile').click()">
+                        Choose File
+                    </button>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="jobDescription">📋 Job Description (Optional)</label>
+                    <textarea id="jobDescription" class="form-control" rows="5" placeholder="Paste the job description for better analysis..."></textarea>
+                </div>
+
+                <button class="btn btn-primary mt-3" onclick="analyzeResume()" style="width: 100%;">
+                    <i class="fas fa-search"></i> Analyze Resume
+                </button>
+            </div>
+
+            <div class="loading active" id="loadingResume" style="display: none;">
+                <div class="spinner"></div>
+                <p class="text-light">Analyzing your resume with AI...</p>
+            </div>
+
+            <div id="resumeResults" style="display: none;">
+                <h2 class="section-title text-light mt-4">📊 Analysis Report</h2>
+                <div class="card-grid">
+                    <div class="card p-4">
+                        <h3 class="mb-2">Score</h3>
+                        <div class="score-display">
+                            <div class="radial-progress-bar" id="atsScoreCircle" data-score="0">
+                                <div class="score-text" id="atsScore">0</div>
+                            </div>
+                            <p class="stat-label mt-2">ATS Compatibility Score</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4">
+                        <h3 class="mb-2">🔑 Extracted Keywords</h3>
+                        <div class="skills-container" id="extractedSkills"></div>
+                    </div>
+
+                    <div class="card p-4 full-width">
+                        <h3 class="mb-2">💡 Overall Analysis</h3>
+                        <p id="analysisSummary"></p>
+                    </div>
+
+                    <div class="card p-4">
+                        <h3 class="mb-2 text-success">👍 Strengths</h3>
+                        <ul class="check-list" id="strengthsList"></ul>
+                    </div>
+                    <div class="card p-4">
+                        <h3 class="mb-2 text-danger">👎 Weaknesses</h3>
+                        <ul class="cross-list" id="weaknessesList"></ul>
+                    </div>
+
+                    <div class="card p-4 full-width">
+                        <h3 class="mb-2 text-primary">🚀 Actionable Improvements</h3>
+                        <div id="improvements"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="recommender" class="content-section">
+            <h1 class="section-title">💼 Career Recommender System</h1>
+            <div class="card p-3 alert-info-bg">
+                <i class="fas fa-info-circle icon-large"></i>
+                <span>Enter your skills (comma-separated) to get personalized internship and course recommendations!</span>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <h3 class="mb-2">Filter Recommendations</h3>
+                <div class="form-group">
+                    <label for="userSkills">🎯 Your Skills (comma-separated)</label>
+                    <textarea id="userSkills" class="form-control" rows="3" placeholder="e.g., Python, Machine Learning, JavaScript, React, Data Analysis"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="careerInterest">🎓 Career Interest (Optional)</label>
+                    <input type="text" id="careerInterest" class="form-control" placeholder="e.g., Data Science, Web Development, AI/ML">
+                </div>
+
+                <button class="btn btn-primary mt-3" onclick="getRecommendations()" style="width: 100%;">
+                    <i class="fas fa-rocket"></i> Get Recommendations
+                </button>
+            </div>
+
+            <div class="loading active" id="loadingRecommender" style="display: none;">
+                <div class="spinner"></div>
+                <p class="text-light">Finding best matches for you...</p>
+            </div>
+
+            <div id="recommendations" style="display: none;">
+                <h2 class="section-title text-light">🏢 Recommended Internships</h2>
+                <div id="internshipsList"></div>
+
+                <h2 class="section-title text-light mt-4">📚 Recommended Courses</h2>
+                <div id="coursesList"></div>
+            </div>
+        </section>
+
+        <section id="mentors" class="content-section">
+            <h1 class="section-title">👨‍🏫 Faculty Mentor Finder</h1>
+            <div class="card p-3 alert-info-bg">
+                <i class="fas fa-info-circle icon-large"></i>
+                <span>Search by keyword or use **Semantic Search** for conceptual matches in research and expertise!</span>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <div class="form-group">
+                    <label for="mentorSearch">🔍 Search for mentors</label>
+                    <input type="text" id="mentorSearch" class="form-control" placeholder="e.g., Machine Learning, Web Development, Robotics...">
+                </div>
+
+                <div class="search-type-toggle">
+                    <label>Search Mode:</label>
+                    <div class="segmented-control">
+                        <input type="radio" id="searchKeyword" name="searchType" value="keyword" onclick="searchMentors('keyword')" checked>
+                        <label for="searchKeyword">Keyword</label>
+                        <input type="radio" id="searchSemantic" name="searchType" value="semantic" onclick="searchMentors('semantic')">
+                        <label for="searchSemantic">Semantic</label>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary mt-3" onclick="searchMentors(document.querySelector('input[name=searchType]:checked').value)" style="width: 100%;">
+                    <i class="fas fa-search"></i> Search Mentors
+                </button>
+            </div>
+
+            <div id="mentorsList" class="mentor-grid">
+                </div>
+        </section>
+    </div>
+
+    <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="api.js"></script>
+
+    <script>
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        const uploadArea = document.getElementById('uploadArea');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+        });
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('resumeFile').files = files;
+            handleFileSelect({target: {files: files}});
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadArea.querySelector('h3').textContent = `Selected: ${file.name}`;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlatformStats();
+            searchMentors(); 
+        });
+
+        window.showSection = showSection;
+        window.handleFileSelect = handleFileSelect;
+        
+        
+        window.getSearchType = () => document.querySelector('input[name=searchType]:checked').value;
+    </script>
+</body>
+</html>
