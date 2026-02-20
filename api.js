@@ -66,7 +66,7 @@ function updateAtsScoreDisplay(score) {
     
     // Clear any existing interval to prevent overlap issues
     if (scoreText.__animationId) {
-        clearInterval(scoreText.__animationId);
+        clearInterval(scoreText.__animationId)
     }
     
     // Safely parse current score, defaulting to 0 if content is non-numeric (e.g., "-1028" from prior error)

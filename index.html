@@ -4,17 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MentorAQ - Your Career Companion</title>
+    <link rel="icon" type="image/png" href="mentoraq without background.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="mentoraq without background.png" sizes="192x192">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> </head>
+    <link rel="stylesheet" href="style.css?v=2"> </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">🎓 Career Craft</div>
+            <div class="logo" aria-label="MentorAQ">
+  <img src="mentoraq without background.png" alt="MentorAQ logo" class="logo-img"/>
+</div>
             <ul class="nav-links">
                 <li><a href="#" onclick="showSection('home')">Home</a></li>
                 <li><a href="#" onclick="showSection('resume')">Resume Analyzer</a></li>
                 <li><a href="#" onclick="showSection('recommender')">Career Recommender</a></li>
                 <li><a href="#" onclick="showSection('mentors')">Find Mentor</a></li>
+                <li><a href="#" id="navRoadmap" onclick="goToRoadmapOrResume()"><span id="navRoadmapLabel">Roadmap</span></a></li>
             </ul>
         </div>
     </nav>
@@ -22,50 +30,83 @@
     <div class="container">
         <section id="home" class="content-section active">
             <div class="hero">
-                <h1>🎓 Welcome to Career Craft</h1>
-                <p>Your intelligent career companion for resume analysis, personalized recommendations, and expert mentorship</p>
+                <h1 class="hero-title">🎓 Welcome to MentorAQ</h1>
+                <p class="hero-sub">Your intelligent career companion for resume analysis, personalized recommendations, and expert mentorship</p>
+                <div class="hero-actions">
+                  <button class="btn btn-primary btn-glow" onclick="showSection('resume')"><i class="fas fa-bolt"></i> Get Started</button>
+                  <button class="btn btn-ghost" onclick="document.querySelector('.features') && document.querySelector('.features').scrollIntoView({behavior:'smooth', block:'start'})"><i class="fas fa-compass"></i> Explore Features</button>
+                </div>
             </div>
 
             <div class="features">
                 <div class="feature-card" onclick="showSection('resume')">
-                    <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
-                    <h2>Resume Analyzer</h2>
-                    <p>Get instant ATS compatibility score and professional improvement suggestions</p>
-                    <button class="btn btn-primary">Analyze Resume</button>
+                    <div class="feature-icon"><i class="fas fa-file-arrow-up"></i></div>
+                    <div class="feature-body">
+                      <h2>Resume Analyzer</h2>
+                      <p>Get instant ATS compatibility score and professional improvement suggestions.</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow">Upload Resume</button>
                 </div>
                 <div class="feature-card" onclick="showSection('recommender')">
-                    <div class="feature-icon"><i class="fas fa-briefcase"></i></div>
-                    <h2>Career Recommender</h2>
-                    <p>Get personalized internship and course recommendations based on your skills</p>
-                    <button class="btn btn-primary">Get Recommendations</button>
+                    <div class="feature-icon"><i class="fas fa-compass"></i></div>
+                    <div class="feature-body">
+                      <h2>Career Recommender</h2>
+                      <p>Personalized internship and course recommendations based on your skills.</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow">Discover Career Paths</button>
                 </div>
                 <div class="feature-card" onclick="showSection('mentors')">
-                    <div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                    <h2>Find Mentor</h2>
-                    <p>Connect with expert faculty mentors who can guide your career journey</p>
-                    <button class="btn btn-primary">Find Mentor</button>
+                    <div class="feature-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="feature-body">
+                      <h2>Find Mentor</h2>
+                      <p>Connect with expert faculty mentors who can guide your career journey.</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow">Find a Mentor</button>
+                </div>
+                <div class="feature-card" onclick="goToRoadmapOrResume()">
+                    <div class="feature-icon"><i class="fas fa-route"></i></div>
+                    <div class="feature-body">
+                      <h2>Roadmap</h2>
+                      <p>Create a step-by-step plan tailored to your goals and skills.</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow"><span id="homeRoadmapCta">Make Roadmap</span></button>
                 </div>
             </div>
             
+            
             <h2 class="section-title text-light">Platform Statistics</h2>
             <div class="stats" id="statsContainer">
-                <div class="stat-card">
-                    <div class="stat-number">...</div>
+                <div class="stat-card" data-count="120" data-suffix="+">
+                    <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Faculty Mentors</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">...</div>
+                <div class="stat-card" data-count="450" data-suffix="+">
+                    <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Internships</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">...</div>
+                <div class="stat-card" data-count="300" data-suffix="+">
+                    <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Courses</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">...</div>
+                <div class="stat-card" data-count="2000" data-suffix="+">
+                    <div class="stat-icon"><i class="fas fa-download"></i></div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Total Requests</div>
                 </div>
             </div>
+
+            <section class="trusted">
+              <div class="trusted-card">
+                <h3 class="trusted-title">Trusted by students & mentors</h3>
+                <p class="trusted-sub">Real outcomes through real guidance. Join a growing community.</p>
+                <div class="trusted-avatars">
+                  <div class="avatar more">+1k</div>
+                </div>
+              </div>
+            </section>
         </section>
 
         <section id="resume" class="content-section">
@@ -141,6 +182,54 @@
             </div>
         </section>
 
+       <section id="roadmap" class="content-section">
+         <h1 class="section-title">🗺️ Career Roadmap Generator</h1>
+ 
+         <!-- Input Card (mirrors Resume Analyzer structure) -->
+         <div class="card p-4 mb-4">
+           <div class="form-group">
+             <label for="roadmapGoal">🎯 Your Goal</label>
+             <textarea id="roadmapGoal" class="form-control" rows="3" placeholder="e.g., Become a Frontend Intern, Crack Data Science Internship, Get into AI/ML course"></textarea>
+           </div>
+ 
+           <div class="form-group mt-2">
+             <label for="roadmapSkills">🧩 Current Skills (comma-separated)</label>
+             <input id="roadmapSkills" class="form-control" placeholder="e.g., Python, HTML/CSS, React, SQL">
+           </div>
+ 
+           <div class="form-group mt-2">
+             <label for="roadmapDuration">⏱️ Duration</label>
+             <select id="roadmapDuration" class="form-control">
+               <option value="4">4 weeks</option>
+               <option value="6">6 weeks</option>
+               <option value="8" selected>8 weeks</option>
+               <option value="12">12 weeks</option>
+             </select>
+           </div>
+ 
+           <button class="btn btn-primary mt-3" style="width:100%" onclick="generateRoadmap()">
+             <i class="fas fa-route"></i> Generate Roadmap
+           </button>
+         </div>
+ 
+         <!-- Loading -->
+         <div class="loading active" id="loadingRoadmap" style="display: none;">
+           <div class="spinner"></div>
+           <p class="text-light">Building your personalized roadmap...</p>
+         </div>
+ 
+         <!-- Results (mirrors Resume Analyzer card grid) -->
+         <div id="roadmapResults" style="display:none;">
+           <h2 class="section-title text-light mt-4">🗂️ Your Plan</h2>
+           <p id="roadmapIntro" class="text-light">This roadmap is generated from your goal, skills and duration. Adjust as you go.</p>
+           <div id="roadmapContent" class="card-grid mt-3"></div>
+         </div>
+ 
+         <div class="mt-3">
+           <button class="btn btn-secondary" onclick="showSection('home')"><i class="fas fa-home"></i> Back to Home</button>
+         </div>
+       </section>
+
         <section id="recommender" class="content-section">
             <h1 class="section-title">💼 Career Recommender System</h1>
             <div class="card p-3 alert-info-bg">
@@ -212,13 +301,15 @@
         </section>
     </div>
 
-    <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-        <i class="fas fa-arrow-up"></i>
-    </button>
     
     <script src="api.js"></script>
+    <script src="script.js?v=2"></script>
 
     <script>
+
+
+        // Force light theme permanently
+        document.documentElement.removeAttribute('data-theme');
 
         function showSection(sectionId) {
             document.querySelectorAll('.content-section').forEach(section => {
@@ -265,7 +356,7 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             loadPlatformStats();
-            searchMentors(); 
+            searchMentors();
         });
 
         window.showSection = showSection;
