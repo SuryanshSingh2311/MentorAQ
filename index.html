@@ -10,18 +10,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2"> </head>
+    <link rel="stylesheet" href="style.css?v=2"> 
+</head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo" aria-label="MentorAQ">
-  <img src="mentoraq without background.png" alt="MentorAQ logo" class="logo-img"/>
-</div>
+                <img src="mentoraq without background.png" alt="MentorAQ logo" class="logo-img"/>
+            </div>
             <ul class="nav-links">
                 <li><a href="#" onclick="showSection('home')">Home</a></li>
                 <li><a href="#" onclick="showSection('resume')">Resume Analyzer</a></li>
                 <li><a href="#" onclick="showSection('recommender')">Career Recommender</a></li>
                 <li><a href="#" onclick="showSection('mentors')">Find Mentor</a></li>
+                <li><a href="#" onclick="showSection('interviewSection')">Mock Interview</a></li>
+                <li><a href="#" onclick="showSection('outreachSection')">Outreach Copilot</a></li>
                 <li><a href="#" id="navRoadmap" onclick="goToRoadmapOrResume()"><span id="navRoadmapLabel">Roadmap</span></a></li>
             </ul>
         </div>
@@ -71,8 +74,23 @@
                     </div>
                     <button class="btn btn-primary btn-glow"><span id="homeRoadmapCta">Make Roadmap</span></button>
                 </div>
+                <div class="feature-card" onclick="showSection('interviewSection')">
+                    <div class="feature-icon"><i class="fas fa-microphone"></i></div>
+                    <div class="feature-body">
+                      <h2>Mock Interview</h2>
+                      <p>Practice under pressure with an AI that adapts to your answers.</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow">Start Interview</button>
+                </div>
+                <div class="feature-card" onclick="showSection('outreachSection')">
+                    <div class="feature-icon"><i class="fas fa-paper-plane"></i></div>
+                    <div class="feature-body">
+                      <h2>Outreach Copilot</h2>
+                      <p>Generate highly personalized Cold Emails and LinkedIn DMs to get interviews.</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow">Draft Outreach</button>
+                </div>
             </div>
-            
             
             <h2 class="section-title text-light">Platform Statistics</h2>
             <div class="stats" id="statsContainer">
@@ -182,10 +200,9 @@
             </div>
         </section>
 
-       <section id="roadmap" class="content-section">
+        <section id="roadmap" class="content-section">
          <h1 class="section-title">🗺️ Career Roadmap Generator</h1>
  
-         <!-- Input Card (mirrors Resume Analyzer structure) -->
          <div class="card p-4 mb-4">
            <div class="form-group">
              <label for="roadmapGoal">🎯 Your Goal</label>
@@ -212,13 +229,11 @@
            </button>
          </div>
  
-         <!-- Loading -->
          <div class="loading active" id="loadingRoadmap" style="display: none;">
            <div class="spinner"></div>
            <p class="text-light">Building your personalized roadmap...</p>
          </div>
  
-         <!-- Results (mirrors Resume Analyzer card grid) -->
          <div id="roadmapResults" style="display:none;">
            <h2 class="section-title text-light mt-4">🗂️ Your Plan</h2>
            <p id="roadmapIntro" class="text-light">This roadmap is generated from your goal, skills and duration. Adjust as you go.</p>
@@ -297,17 +312,134 @@
             </div>
 
             <div id="mentorsList" class="mentor-grid">
-                </div>
+            </div>
         </section>
+
+        <section id="outreachSection" class="content-section">
+            <div class="header-content mb-4">
+                <h1 class="text-primary"><i class="fas fa-paper-plane"></i> Smart Outreach Copilot</h1>
+                <p>Turn your resume strengths into undeniable Cold Emails and LinkedIn connection requests.</p>
+            </div>
+
+            <div class="card p-4">
+                <div class="form-group mb-3">
+                    <label>🎯 Target Role / Job Title</label>
+                    <input type="text" id="outreachRole" class="form-control" placeholder="e.g., Junior Python Developer">
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>🏢 Target Company</label>
+                    <input type="text" id="outreachCompany" class="form-control" placeholder="e.g., Google, Stripe, Local Tech Startup">
+                </div>
+
+                <div class="form-group mb-4">
+                    <label>💪 Your Top Skills & Strengths</label>
+                    <textarea id="outreachSkills" class="form-control" rows="3" placeholder="e.g., Strong in FastAPI and LangChain, won a national hackathon, 3 years Python experience..."></textarea>
+                    <small class="text-muted">Pro tip: Copy and paste the "Strengths" generated from your Resume Analyzer report here!</small>
+                </div>
+
+                <button class="btn btn-primary" onclick="generateOutreach()" style="width: 100%;">
+                    <i class="fas fa-magic"></i> Generate Outreach Messages
+                </button>
+            </div>
+
+            <div class="loading active" id="loadingOutreach" style="display: none;">
+                <div class="spinner"></div>
+                <p class="text-light">Crafting the perfect pitch...</p>
+            </div>
+
+            <div id="outreachResults" style="display: none; margin-top: 2rem;">
+                <h2 class="section-title text-light mb-3">Your AI-Drafted Messages</h2>
+                
+                <div class="grid" style="grid-template-columns: 1fr; gap: 1.5rem;">
+                    <div class="card p-4">
+                        <h3 class="mb-2 text-primary"><i class="fas fa-envelope"></i> Formal Cold Email</h3>
+                        <p class="text-muted mb-3">Best for reaching out to Hiring Managers or CTOs directly.</p>
+                        <div style="background: var(--bg-elev); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); white-space: pre-wrap;" id="resEmailFormal"></div>
+                        <button class="btn btn-outline mt-3" onclick="copyToClipboard('resEmailFormal')"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+                    </div>
+
+                    <div class="card p-4">
+                        <h3 class="mb-2 text-primary"><i class="fab fa-linkedin"></i> LinkedIn Connection Note</h3>
+                        <p class="text-muted mb-3">Under 300 characters. Perfect for sending with a connection request.</p>
+                        <div style="background: var(--bg-elev); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); white-space: pre-wrap;" id="resLinkedIn"></div>
+                        <button class="btn btn-outline mt-3" onclick="copyToClipboard('resLinkedIn')"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+                    </div>
+
+                    <div class="card p-4">
+                        <h3 class="mb-2 text-primary"><i class="fas fa-bolt"></i> Punchy / Short Email</h3>
+                        <p class="text-muted mb-3">Best for busy startup founders or quick follow-ups.</p>
+                        <div style="background: var(--bg-elev); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); white-space: pre-wrap;" id="resEmailShort"></div>
+                        <button class="btn btn-outline mt-3" onclick="copyToClipboard('resEmailShort')"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="interviewSection" class="content-section">
+            <div class="header-content mb-4">
+                <h1 class="text-primary">AI Mock Interview</h1>
+                <p>Practice under pressure with an AI that adapts to your answers.</p>
+            </div>
+
+            <div id="interviewSetup" class="card p-4">
+                <h3>Interview Configuration</h3>
+                <div class="form-group mt-3">
+                    <label>Your Field (e.g., Software Engineering, Marketing)</label>
+                    <input type="text" id="intField" class="form-control mb-3" placeholder="Software Engineering">
+                    
+                    <label>Specific Topic (e.g., Python, System Design)</label>
+                    <input type="text" id="intTopic" class="form-control mb-3" placeholder="Python and FastAPI">
+                    
+                    <label>Difficulty</label>
+                    <select id="intDifficulty" class="form-control mb-4">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                    
+                    <button class="btn btn-primary" onclick="startInterview()">Start Interview</button>
+                </div>
+            </div>
+
+            <div id="interviewActive" class="card p-4" style="display: none;">
+                <div id="interviewChat" style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem; padding: 1rem; background: var(--bg-elev); border-radius: 8px;">
+                </div>
+                
+                <div class="form-group mt-3">
+                    <textarea id="intAnswerText" class="form-control mb-3" rows="3" placeholder="Type your answer here..."></textarea>
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="btnSubmitAnswer" class="btn btn-primary" onclick="submitAnswer()">Submit Answer</button>
+                        <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="endInterview()">End & Get Score</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="interviewScorecard" class="card p-4" style="display: none;">
+                <h2 class="text-primary mb-3"><i class="fas fa-chart-pie"></i> Final Scorecard</h2>
+                <h1 style="font-size: 3rem; color: var(--brand-cyan);" id="scoreValue">85/100</h1>
+                <p id="scoreDetailed" class="mb-4" style="font-size: 1.1rem;"></p>
+                
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="p-3" style="background: rgba(22, 163, 74, 0.1); border-radius: 8px;">
+                        <h4 style="color: var(--success-color);">Strengths</h4>
+                        <ul id="scoreStrengths" style="margin-left: 1.5rem; margin-top: 0.5rem;"></ul>
+                    </div>
+                    <div class="p-3" style="background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                        <h4 style="color: var(--danger-color);">Areas to Improve</h4>
+                        <ul id="scoreWeaknesses" style="margin-left: 1.5rem; margin-top: 0.5rem;"></ul>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="resetInterview()">Start a New Interview</button>
+            </div>
+        </section>
+
     </div>
 
-    
     <script src="api.js"></script>
     <script src="script.js?v=2"></script>
 
     <script>
-
-
         // Force light theme permanently
         document.documentElement.removeAttribute('data-theme');
 
@@ -361,7 +493,6 @@
 
         window.showSection = showSection;
         window.handleFileSelect = handleFileSelect;
-        
         
         window.getSearchType = () => document.querySelector('input[name=searchType]:checked').value;
     </script>

@@ -2,7 +2,7 @@
 
 // Configuration
 const API_BASE_URL = 'http://localhost:8000/api';
-const API_TIMEOUT = 60000; // 60 seconds for LLM operations
+const API_TIMEOUT = 120000; // 60 seconds for LLM operations
 
 // Utility function to handle API errors with detailed messaging
 function handleApiError(error) {
@@ -66,7 +66,7 @@ function updateAtsScoreDisplay(score) {
     
     // Clear any existing interval to prevent overlap issues
     if (scoreText.__animationId) {
-        clearInterval(scoreText.__animationId)
+        clearInterval(scoreText.__animationId);
     }
     
     // Safely parse current score, defaulting to 0 if content is non-numeric (e.g., "-1028" from prior error)
@@ -738,7 +738,103 @@ async function loadPlatformStats() {
         }
     }
 }
+// =====================================
+// Career Roadmap API
+// =====================================
+async function generateRoadmapAPI(goal, skills, duration) {
+    try {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/roadmap`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                goal: goal,
+                skills: skills,
+                duration: parseInt(duration)
+            })
+        }, 90000); // 90 seconds for LLM generation
 
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || `Server error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Roadmap API error:', error);
+        return handleApiError(error);
+    }
+}
+
+async function generateRoadmap() {
+    const goal = document.getElementById('roadmapGoal').value.trim();
+    const skills = document.getElementById('roadmapSkills').value.trim();
+    const duration = document.getElementById('roadmapDuration').value;
+    
+    if (!goal) {
+        showErrorNotification('Please enter a goal for your roadmap!');
+        return;
+    }
+
+    const loadingEl = document.getElementById('loadingRoadmap');
+    const resultsEl = document.getElementById('roadmapResults');
+    const contentEl = document.getElementById('roadmapContent');
+
+    // Reset visuals
+    loadingEl.style.display = 'flex';
+    resultsEl.style.display = 'none';
+
+    try {
+        const data = await generateRoadmapAPI(goal, skills, duration);
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        loadingEl.style.display = 'none';
+        resultsEl.style.display = 'block';
+
+        // Update the intro text
+        document.getElementById('roadmapIntro').innerHTML = `
+            Your tailored roadmap to achieve <strong>"${data.goal}"</strong> in <strong>${data.duration} weeks</strong>.
+        `;
+
+        // Render the steps
+        const stepsHtml = data.steps.map(step => `
+          <div class="card p-4 full-width">   
+                     <h3 class="mb-2 text-primary">
+                    <i class="fas fa-calendar-week"></i> Week ${step.week}: ${step.title}
+                </h3>
+                <p style="font-size: 1.05em; line-height: 1.6;">${step.description}</p>
+                
+                <div class="mt-3">
+                    <p style="font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem;">
+                        <i class="fas fa-link"></i> Recommended Resources:
+                    </p>
+                    <div class="skills-container">
+                        ${step.resources.map(res => `<span class="skill-tag" style="background: var(--bg-elev); color: var(--text-dark); border-color: var(--border);">${res}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        contentEl.innerHTML = stepsHtml;
+        showSuccessNotification('✅ Roadmap generated successfully!');
+        
+        // Scroll to results cleanly
+        setTimeout(() => {
+            resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+
+    } catch (error) {
+        loadingEl.style.display = 'none';
+        showErrorNotification(`Failed to generate roadmap: ${error.message}`);
+    }
+}
+
+// Add the missing navigation function for your top navbar
+function goToRoadmapOrResume() {
+    showSection('roadmap');
+}
 // =====================================
 // Initialize on page load
 // =====================================
@@ -754,8 +850,211 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load initial mentors list
     await searchMentors('keyword');
 });
+// =====================================
+// AI Mock Interview Logic
+// =====================================
+let currentInterviewSessionId = null;
 
-// Export functions to global scope for HTML event handlers
+async function startInterview() {
+    const field = document.getElementById('intField').value.trim();
+    const topic = document.getElementById('intTopic').value.trim();
+    const diff = document.getElementById('intDifficulty').value;
+    
+    if(!field || !topic) {
+        showErrorNotification("Please enter both Field and Topic.");
+        return;
+    }
+
+    document.getElementById('interviewSetup').style.display = 'none';
+    document.getElementById('interviewActive').style.display = 'block';
+    
+    const chatBox = document.getElementById('interviewChat');
+    chatBox.innerHTML = '<p style="color: var(--text-muted);"><em>AI is generating your first question...</em></p>';
+
+    try {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/interview/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_email: "guest@mentoraq.com", // Replace with real auth if available
+                field: field,
+                topic: topic,
+                difficulty: diff
+            })
+        });
+        
+        const data = await response.json();
+        currentInterviewSessionId = data.session_id;
+        
+        chatBox.innerHTML = `
+            <div style="margin-bottom: 1rem; border-left: 3px solid var(--primary-color); padding-left: 10px;">
+                <strong><i class="fas fa-robot text-primary"></i> Interviewer:</strong>
+                <p class="mt-1">${data.question}</p>
+            </div>
+        `;
+    } catch (error) {
+        showErrorNotification("Failed to start interview.");
+        resetInterview();
+    }
+}
+
+async function submitAnswer() {
+    const answerText = document.getElementById('intAnswerText').value.trim();
+    if(!answerText || !currentInterviewSessionId) return;
+
+    const chatBox = document.getElementById('interviewChat');
+    const btn = document.getElementById('btnSubmitAnswer');
+    
+    // Append user answer visually
+    chatBox.innerHTML += `
+        <div style="margin-bottom: 1.5rem; text-align: right; border-right: 3px solid #64748b; padding-right: 10px;">
+            <strong>You:</strong>
+            <p class="mt-1">${answerText}</p>
+        </div>
+        <p id="typingIndicator" style="color: var(--text-muted); font-size: 0.9em;"><em>Interviewer is typing...</em></p>
+    `;
+    
+    document.getElementById('intAnswerText').value = '';
+    btn.disabled = true;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/interview/answer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: currentInterviewSessionId,
+                answer: answerText
+            })
+        });
+        
+        const data = await response.json();
+        document.getElementById('typingIndicator').remove();
+        
+        // Append AI Feedback & Next Question
+        chatBox.innerHTML += `
+            <div style="margin-bottom: 1.5rem; border-left: 3px solid var(--primary-color); padding-left: 10px;">
+                <p style="color: var(--warning-color); font-size: 0.9em;" class="mb-2"><i class="fas fa-lightbulb"></i> Feedback: ${data.feedback}</p>
+                <strong><i class="fas fa-robot text-primary"></i> Interviewer:</strong>
+                <p class="mt-1">${data.next_question}</p>
+            </div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (error) {
+        document.getElementById('typingIndicator').innerHTML = "Error analyzing answer.";
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function endInterview() {
+    if(!currentInterviewSessionId) return;
+
+    document.getElementById('interviewActive').style.display = 'none';
+    const scorecardDiv = document.getElementById('interviewScorecard');
+    scorecardDiv.style.display = 'block';
+    
+    document.getElementById('scoreDetailed').innerHTML = "<em>Analyzing your performance history...</em>";
+    
+    
+
+    try {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/interview/end`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: currentInterviewSessionId })
+        }, 90000); // Allow extra time for scorecard generation
+        
+        const data = await response.json();
+        
+        document.getElementById('scoreValue').textContent = `${data.overall_score}/100`;
+        document.getElementById('scoreDetailed').textContent = data.detailed_feedback;
+        
+        document.getElementById('scoreStrengths').innerHTML = data.strengths.map(s => `<li>${s}</li>`).join('');
+        document.getElementById('scoreWeaknesses').innerHTML = data.weaknesses.map(w => `<li>${w}</li>`).join('');
+        
+        currentInterviewSessionId = null;
+    } catch (error) {
+        document.getElementById('scoreDetailed').textContent = "Failed to generate your scorecard.";
+    }
+}
+
+function resetInterview() {
+    currentInterviewSessionId = null;
+    document.getElementById('interviewScorecard').style.display = 'none';
+    document.getElementById('interviewActive').style.display = 'none';
+    document.getElementById('interviewSetup').style.display = 'block';
+    document.getElementById('intAnswerText').value = '';
+}
+// =====================================
+// Outreach Copilot Logic
+// =====================================
+async function generateOutreach() {
+    const role = document.getElementById('outreachRole').value.trim();
+    const company = document.getElementById('outreachCompany').value.trim();
+    const skills = document.getElementById('outreachSkills').value.trim();
+
+    if (!role || !company || !skills) {
+        showErrorNotification("Please fill in the target role, company, and your skills.");
+        return;
+    }
+
+    const loadingEl = document.getElementById('loadingOutreach');
+    const resultsEl = document.getElementById('outreachResults');
+
+    loadingEl.style.display = 'flex';
+    resultsEl.style.display = 'none';
+
+    try {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/outreach/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                target_role: role,
+                target_company: company,
+                skills_and_strengths: skills
+            })
+        });
+
+        const data = await response.json();
+
+        // Populate the UI cards
+        document.getElementById('resEmailFormal').textContent = data.email_formal;
+        document.getElementById('resLinkedIn').textContent = data.linkedin_dm;
+        document.getElementById('resEmailShort').textContent = data.email_short;
+
+        loadingEl.style.display = 'none';
+        resultsEl.style.display = 'block';
+        showSuccessNotification("Messages generated successfully!");
+
+        // Scroll down
+        setTimeout(() => {
+            resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+
+    } catch (error) {
+        loadingEl.style.display = 'none';
+        showErrorNotification("Failed to generate outreach messages. Please try again.");
+    }
+}
+
+function copyToClipboard(elementId) {
+    const text = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        showSuccessNotification("Copied to clipboard!");
+    }).catch(err => {
+        console.error("Failed to copy:", err);
+        showErrorNotification("Failed to copy text.");
+    });
+}
+
+window.generateOutreach = generateOutreach;
+window.copyToClipboard = copyToClipboard;
+
+window.startInterview = startInterview;
+window.submitAnswer = submitAnswer;
+window.endInterview = endInterview;
+window.resetInterview = resetInterview;
 window.analyzeResume = analyzeResume;
 window.getRecommendations = getRecommendations;
 window.searchMentors = searchMentors;
@@ -764,3 +1063,5 @@ window.closeMentorshipForm = closeMentorshipForm;
 window.submitMentorshipRequest = submitMentorshipRequest;
 window.loadPlatformStats = loadPlatformStats;
 window.checkAPIHealth = checkAPIHealth;
+window.generateRoadmap = generateRoadmap;
+window.goToRoadmapOrResume = goToRoadmapOrResume;
